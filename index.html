@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dummy Payment Gateway</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f4f7f6; }
+        .payment-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { margin-top: 0; color: #333; font-size: 1.2rem; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .row { display: flex; gap: 10px; }
+        button { width: 100%; padding: 14px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 10px; }
+        button:disabled { background: #ccc; }
+        #message { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; font-size: 0.9rem; }
+        .success { background: #d4edda; color: #155724; display: block !important; }
+        .error { background: #f8d7da; color: #721c24; display: block !important; }
+    </style>
+</head>
+<body>
+
+<div class="payment-card">
+    <h2>Secure Checkout (Test Mode)</h2>
+    <form id="paymentForm">
+        <input type="text" id="cardNumber" placeholder="Card Number (Try 4242...)" maxlength="16" required>
+        <div class="row">
+            <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required>
+            <input type="text" id="cvv" placeholder="CVV" maxlength="3" required>
+        </div>
+        <button type="submit" id="payBtn">Pay Now</button>
+    </form>
+    <div id="message"></div>
+</div>
+
+<script>
+    const form = document.getElementById('paymentForm');
+    const msgDiv = document.getElementById('message');
+    const payBtn = document.getElementById('payBtn');
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        
+        // Reset state
+        msgDiv.className = '';
+        msgDiv.innerText = "Processing payment...";
+        msgDiv.style.display = 'block';
+        payBtn.disabled = true;
+
+        const cardDetails = {
+            number: document.getElementById('cardNumber').value,
+            expiry: document.getElementById('expiry').value,
+            cvv: document.getElementById('cvv').value
+        };
+
+        // Logic from previous turn
+        const result = await processDummyPayment(cardDetails);
+        
+        msgDiv.innerText = result.status === "success" 
+            ? `Success! ID: ${result.transactionId}` 
+            : `Error: ${result.message}`;
+        msgDiv.className = result.status;
+        payBtn.disabled = false;
+    };
+
+    // --- Core Dummy Payment Logic ---
+    async function processDummyPayment(card) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                if (card.number.startsWith("4242")) {
+                    resolve({ status: "success", transactionId: "TX_" + Math.random().toString(36).substr(2, 9) });
+                } else {
+                    resolve({ status: "error", message: "Declined by dummy bank." });
+                }
+            }, 1500);
+        });
+    }
+</script>
+
+</body>
+</html>
